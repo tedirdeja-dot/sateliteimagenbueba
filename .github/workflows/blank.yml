@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     steps:
@@ -33,11 +33,13 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Configurar Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Instalar SDK 35
-        run: sdkmanager "platforms;android-35" "build-tools;34.0.0"
+      # Ubuntu 24.04 ya incluye Android SDK 35 y Build Tools 34.
+      - name: Comprobar Android SDK preinstalado
+        shell: bash
+        run: |
+          test -f "$ANDROID_HOME/platforms/android-35/android.jar"
+          test -x "$ANDROID_HOME/build-tools/34.0.0/aapt2"
+          printf 'sdk.dir=%s\n' "$ANDROID_HOME" > local.properties
 
       - name: Configurar Gradle 8.10.2
         uses: gradle/actions/setup-gradle@v4
