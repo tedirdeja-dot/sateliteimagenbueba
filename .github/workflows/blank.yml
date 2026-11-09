@@ -1,0 +1,63 @@
+name: Build APK SatelliteWallpaper
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Comprobar archivos necesarios
+        shell: bash
+        run: |
+          for f in settings.gradle.kts build.gradle.kts app/build.gradle.kts app/src/main/AndroidManifest.xml app/fixed.keystore; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Falta $f. Sube el contenido descomprimido del ZIP a la raíz del repositorio."
+              exit 1
+            fi
+          done
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar SDK 35
+        run: sdkmanager "platforms;android-35" "build-tools;34.0.0"
+
+      - name: Configurar Gradle 8.10.2
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      # Este ZIP no incluye gradlew: usamos el Gradle instalado arriba.
+      - name: Compilar APK
+        run: gradle :app:assembleDebug --no-daemon --stacktrace --console=plain
+
+      - name: Preparar APK
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/app-debug.apk dist/SatelliteWallpaper-v4.1.5.apk
+
+      - name: Guardar APK descargable
+        uses: actions/upload-artifact@v4
+        with:
+          name: SatelliteWallpaper-v4.1.5-APK
+          path: dist/SatelliteWallpaper-v4.1.5.apk
+          if-no-files-found: error
+          retention-days: 30
