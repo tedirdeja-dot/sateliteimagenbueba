@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent">#ffd46a3a</color>
+    <color name="button_updating">#FF777F86</color>
+    <color name="ink">#ff10212b</color>
+    <color name="muted">#ff68747a</color>
+    <color name="paper">#fff5f2ea</color>
+    <color name="launcher_icon_background">#0B1429</color>
+</resources>
